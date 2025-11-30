@@ -40,8 +40,9 @@ class VectorDB:
 
     Input:
         chunks... Chunks of course material along with some metadata
+        metadata... Metadata of the course material chunks e.g. 'contains_formula', 'topic', etc.
     """
-    def index_course_material(self, chunks: list[CourseMaterialChunk]) -> None:
+    def index_course_material(self, chunks: list[CourseMaterialChunk], metadata: list[dict]) -> None:
         pass
 
 
@@ -50,8 +51,9 @@ class VectorDB:
 
     Input:
         chunks... Chunks of old exams (questions) along with some metadata
+        metadata... Metadata of the exam question chunks e.g. 'topic', etc.
     """
-    def index_old_exam_questions(self, chunks: list[ExamQuestionChunk]) -> None:
+    def index_old_exam_questions(self, chunks: list[ExamQuestionChunk], metadata: list[dict]) -> None:
         pass
 
     

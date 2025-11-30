@@ -24,7 +24,7 @@ course_service = CourseService()
 
 app = FastAPI()
 
-
+# TODO:
 # upload material -> check if material has already been uploaded via hashing it and looking into our mongo hash db
 # if already uploaded, don't do anything
 # also don't allow user to upload generated exams. Store the hash of generated exams in a db too and check
@@ -68,16 +68,16 @@ async def uploadFile(course_id: int, material_type: CourseMaterialType, file: Up
 
         if material_type == CourseMaterialType.EXAM:
             # 1) Extract text, chunk it, and enrich it with exam question metadata
-            exam_question_chunks: list[ExamQuestionChunk] = file_processor.chunk_and_enrich(pdf_file=pdf_stream, material_type=material_type, course_id=course_id)
+            exam_question_metadata, exam_question_chunks = file_processor.chunk_and_enrich(pdf_file=pdf_stream, material_type=material_type, course_id=course_id)
 
             # 2) Save Exam Chunks in Vector DB
-            vector_db.index_old_exam_questions(exam_question_chunks)
+            vector_db.index_old_exam_questions(exam_question_chunks, exam_question_metadata)
         else:
             # 1) Extract text, chunk it, and enrich it with course material metadata
-            course_material_chunks: list[CourseMaterialChunk] = file_processor.chunk_and_enrich(pdf_file=pdf_stream, material_type=material_type, course_id=course_id)
+            course_material_metadata, course_material_chunks = file_processor.chunk_and_enrich(pdf_file=pdf_stream, material_type=material_type, course_id=course_id)
 
             # 2) Save Course Material in Vector DB
-            vector_db.index_course_material(course_material_chunks)
+            vector_db.index_course_material(course_material_chunks, course_material_metadata)
 
         return Response(status_code=200)
 

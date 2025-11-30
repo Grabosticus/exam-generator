@@ -3,8 +3,7 @@ from models.question_type import QuestionType
 
 """
 This class represents a chunk from an exam (a question).
-It contains the actual question along with some metadata (e.g. question_type).
-You can add new metadata to it (e.g. question_points: int, ...)
+It contains the actual question along with its type
 """
 @dataclass
 class ExamQuestionChunk:

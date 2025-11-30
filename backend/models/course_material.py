@@ -3,4 +3,6 @@
 This class represents the course material that is passed to the LLM.
 """
 class CourseMaterial:
-    text: str
+    text: str # the text of the course material
+
+    metadata: dict # the metadata of the course material e.g. 'topic', 'contains_formula', etc.
