@@ -1,0 +1,13 @@
+The frontend should kind of look/behave like this:
+
+Homepage:
+The homepage contains a list of all courses -> GET /courses
+The user should have the option to create a new course -> POST /courses
+    - The user should be able to click on a course and be redirected to the course's page -> GET /courses/COURSE_ID
+
+Course Page:
+The user should be able to click a "Upload Material" button.
+    - While uploading the user should specify whether they upload slides, notes, or an exam.
+    - When the user uploads the file, it should be sent to the backend -> POST /courses/COURSE_ID/upload/MATERIAL_TYPE
+The user should be able to click a "Generate New Exam Button" -> POST /courses/COURSE_ID/generate
+    - The user should then be able to download the returned PDF
