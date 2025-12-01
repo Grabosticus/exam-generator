@@ -92,16 +92,16 @@ POST Endpoint for new exam generation.
 Input:
     course_id... the ID of the course for which the new exam should be generated
     n_questions (Optional)... The number of questions the new test should have
-    topic (Optional)... The topic the new exam should focus on (e.g. Reinforcement Learning, Transformers, ...)
+    topics (Optional)... The topics the new exam should focus on (e.g. Reinforcement Learning, Transformers, ...)
 """
 @app.post("/courses/{course_id}/generate", status_code=200)
-async def generateExam(course_id: int, n_questions: int = Query(20, ge=1, le=40), topic: str | None = Query(None)):
+async def generateExam(course_id: int, n_questions: int = Query(20, ge=1, le=40), topics: str | None = Query(None)):
 
     try:
         # 1) Query Vector DB for relevant course material and old exam questions
-        if topic is not None:
-            relevant_course_material: list[CourseMaterial] = vector_db.retrieve_course_material(course_id=course_id, query=topic)
-            old_exam_questions: list[Question] = vector_db.retrieve_old_exam_questions(course_id=course_id, query=topic)
+        if topics is not None:
+            relevant_course_material: list[CourseMaterial] = vector_db.retrieve_course_material(course_id=course_id, query=topics)
+            old_exam_questions: list[Question] = vector_db.retrieve_old_exam_questions(course_id=course_id, query=topics)
         else:
             relevant_course_material: list[CourseMaterial] = vector_db.retrieve_course_material(course_id=course_id)
             old_exam_questions: list[Question] = vector_db.retrieve_old_exam_questions(course_id=course_id)

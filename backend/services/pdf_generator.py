@@ -12,8 +12,7 @@ class PDFGenerator:
 
     """
     Takes the given questions and generates a new exam PDF for the given course ID.
-
-    (Optional, but very good to have: Think of ways to generate PDFs that look different e.g. by using different PDF templates)
+        --> Think of ways to generate PDFs that look different e.g. by using different PDF templates
 
     Input: 
         questions... A list of generated questions (see `Question`)

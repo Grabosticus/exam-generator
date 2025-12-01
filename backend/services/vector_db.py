@@ -40,7 +40,7 @@ class VectorDB:
 
     Input:
         chunks... Chunks of course material along with some metadata
-        metadata... Metadata of the course material chunks e.g. 'contains_formula', 'topic', etc.
+        metadata... Metadata of the course material chunks e.g. [{'topic': 'grpo', 'has_images': true}, {'topic': 'ppo', 'has_images': false}, ...]
     """
     def index_course_material(self, chunks: list[CourseMaterialChunk], metadata: list[dict]) -> None:
         pass
@@ -51,7 +51,7 @@ class VectorDB:
 
     Input:
         chunks... Chunks of old exams (questions) along with some metadata
-        metadata... Metadata of the exam question chunks e.g. 'topic', etc.
+        metadata... Metadata of the exam question chunks e.g. [{'topic': 'grpo'}, {'topic': 'transformers'}, ...]
     """
     def index_old_exam_questions(self, chunks: list[ExamQuestionChunk], metadata: list[dict]) -> None:
         pass
@@ -68,7 +68,7 @@ class VectorDB:
     Output:
         A list of `CourseMaterial`
     """
-    def retrieve_course_material(self, course_id: int, query: str = "syllabus for the exam", n: int = 10) -> list[CourseMaterial]:
+    def retrieve_course_material(self, course_id: int, query: str = "FIND_A_GOOD_DEFAULT_VALUE", n: int = 10) -> list[CourseMaterial]:
         pass
 
 
@@ -83,5 +83,5 @@ class VectorDB:
     Output:
         A list of `Question`
     """
-    def retrieve_old_exam_questions(self, course_id: int, query: str = "exam questions", n: int = 10) -> list[Question]:
+    def retrieve_old_exam_questions(self, course_id: int, query: str = "FIND_A_GOOD_DEFAULT_VALUE", n: int = 10) -> list[Question]:
         pass

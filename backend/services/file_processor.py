@@ -8,9 +8,6 @@ This class extracts text from PDFs and enriches it with metadata.
 """
 class FileProcessor:
 
-    CHUNK_SIZE = 0
-    OVERLAP_SIZE = 0
-
     # build your constructor here
     def __init__(self):
         pass
@@ -24,9 +21,8 @@ class FileProcessor:
 
     Depending on the `material_type` different metadata should be extracted
     Currently, no metadata is extracted for both the course material and exam questions.
-
-    (Optional: Think of different metadata that you could extract from the course material)
-    (Optional: Think of different metadata that you could extract from the exam questions)
+        --> Think of different metadata that you could extract from the course material
+        --> Think of different metadata that you could extract from the exam questions
 
 
     Input:
@@ -37,7 +33,8 @@ class FileProcessor:
     Output:
         A tuple with the following entries:
         list[dict]... A list of dictionaries, containing all the chunk metadata. (list[i] contains the chunk metadata for chunk i)
-        list[CourseMaterialChunk] or list[ExamQuestionChunk]... The PDF text as a list of chunks
+                      e.g. {'has_images': true, 'topic': 'grpo'}
+        list[CourseMaterialChunk] or list[ExamQuestionChunk]... The PDF text as a list of chunks, depending on the `material_type`
     """
     def chunk_and_enrich(
         self, 
