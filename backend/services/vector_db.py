@@ -68,7 +68,7 @@ class VectorDB:
     Output:
         A list of `CourseMaterial`
     """
-    def retrieve_course_material(self, course_id: int, query: str = "FIND_A_GOOD_DEFAULT_VALUE", n: int = 10) -> list[CourseMaterial]:
+    def retrieve_course_material(self, course_id: int, query: str | None = None, n: int = 10) -> list[CourseMaterial]:
         pass
 
 
@@ -83,5 +83,5 @@ class VectorDB:
     Output:
         A list of `Question`
     """
-    def retrieve_old_exam_questions(self, course_id: int, query: str = "FIND_A_GOOD_DEFAULT_VALUE", n: int = 10) -> list[Question]:
+    def retrieve_old_exam_questions(self, course_id: int, query: str | None = None, n: int = 10) -> list[Question]:
         pass

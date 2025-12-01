@@ -12,6 +12,8 @@ class QuestionGenerator:
 
     """
     Queries the LLM using a prompt enriched with relevant course material and old exam questions.
+        --> You can choose which LLM to use
+        --> Find a useful way to incorporate the metadata in the `CourseMaterial` and `Question` objects into the prompt.
     
     Input:
         course_id... The ID of the course the exam questions should be generated for

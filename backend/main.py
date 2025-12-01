@@ -95,16 +95,12 @@ Input:
     topics (Optional)... The topics the new exam should focus on (e.g. Reinforcement Learning, Transformers, ...)
 """
 @app.post("/courses/{course_id}/generate", status_code=200)
-async def generateExam(course_id: int, n_questions: int = Query(20, ge=1, le=40), topics: str | None = Query(None)):
+async def generateExam(course_id: int, n_questions: int = Query(20, ge=1, le=40), topics: str | None = Query(None, min_length=3, max_length=50)):
 
     try:
         # 1) Query Vector DB for relevant course material and old exam questions
-        if topics is not None:
-            relevant_course_material: list[CourseMaterial] = vector_db.retrieve_course_material(course_id=course_id, query=topics)
-            old_exam_questions: list[Question] = vector_db.retrieve_old_exam_questions(course_id=course_id, query=topics)
-        else:
-            relevant_course_material: list[CourseMaterial] = vector_db.retrieve_course_material(course_id=course_id)
-            old_exam_questions: list[Question] = vector_db.retrieve_old_exam_questions(course_id=course_id)
+        relevant_course_material: list[CourseMaterial] = vector_db.retrieve_course_material(course_id=course_id, query=topics)
+        old_exam_questions: list[Question] = vector_db.retrieve_old_exam_questions(course_id=course_id, query=topics)
         
         # 2) Query LLM for new exam questions
         new_questions: list[Question] = question_generator.generate_questions(
