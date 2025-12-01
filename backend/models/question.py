@@ -10,6 +10,6 @@ class Question:
 
     question_type: QuestionType
 
-    answer_keys: list[str] | None = None # empty for QuestionType.TEXT_ANSWER, else the multiple choice answers are here
-    
     metadata: dict # the metadata of this question e.g. 'topic', etc.
+
+    answer_keys: list[str] | None = None # empty for QuestionType.TEXT_ANSWER, else the multiple choice answers are here
