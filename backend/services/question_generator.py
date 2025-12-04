@@ -9,18 +9,26 @@ from models.question_type import QuestionType
 logger = logging.getLogger(__name__)
 
 """
-This class generates new exam questions by querying an LLM (OpenAI GPT).
+This class generates new exam questions by querying an LLM via OpenRouter.
+OpenRouter provides access to various LLM providers (OpenAI, Anthropic, Meta, etc.)
+through a unified API that is compatible with the OpenAI SDK.
 """
 
 
 class QuestionGenerator:
 
     def __init__(self):
-        api_key = os.environ.get("OPENAI_API_KEY")
+        api_key = os.environ.get("LLM_API_KEY")
         if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
-        self.client = OpenAI(api_key=api_key)
-        self.model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")  # gpt-4o-mini default
+            raise ValueError("LLM_API_KEY environment variable is not set")
+
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url="https://openrouter.ai/api/v1"
+        )
+        # Default to a cost-effective model, can be any model from OpenRouter
+        # See https://openrouter.ai/models for available models
+        self.model = os.environ.get("LLM_MODEL", "openai/gpt-4o-mini")
 
     def _build_prompt(
             self,
@@ -58,8 +66,7 @@ class QuestionGenerator:
 
         prompt = f"""You are an exam question generator for the university course {course_identifier}.
 
-Your task is to generate {n_new_questions} new exam questions based on the provided course material.
-The new questions should be similar in style and difficulty to the example questions provided.
+Your task is to generate {n_new_questions} new exam questions based on the provided course material.The new questions should be similar in style and difficulty to the example questions provided.
 
 === COURSE MATERIAL ===
 {course_material_text if course_material_text else "No course material provided."}
@@ -160,7 +167,7 @@ IMPORTANT: Return ONLY the JSON array, no additional text or markdown formatting
         )
 
         log_identifier = course_name if course_name else f"course {course_id}"
-        logger.info(f"Generating {n_new_questions} questions for {log_identifier}")
+        logger.info(f"Generating {n_new_questions} questions for {log_identifier} using model {self.model}")
 
         try:
             response = self.client.chat.completions.create(
@@ -188,5 +195,5 @@ IMPORTANT: Return ONLY the JSON array, no additional text or markdown formatting
             return questions
 
         except Exception as e:
-            logger.error(f"Error calling OpenAI API: {e}")
+            logger.error(f"Error calling LLM API: {e}")
             raise

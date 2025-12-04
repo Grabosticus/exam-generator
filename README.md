@@ -8,31 +8,42 @@ A web application that generates new exams in the form and style of an old exam 
 
 1. **Docker Desktop** must be running (green icon / "Engine running") before proceeding.
 
-2. **Set the OpenAI API Key** in your terminal.
+2. **Set the LLM API Key** in your terminal.
 
    Get the API key from the WhatsApp group. NEVER commit the key to code – anyone on GitHub could steal it!
 
    These environment variables are **only valid while the terminal is open**. You need to set them again for each new terminal session.
 
    **Mac / Linux:**
-   ```bash
-   export OPENAI_API_KEY="sk-your-api-key-here"
-   ```
-
+```bash
+   export LLM_API_KEY="sk-or-your-api-key-here"
+```
    **Windows (Command Prompt):**
-   ```cmd
-   set OPENAI_API_KEY=sk-your-api-key-here
-   ```
-
+```cmd
+   set LLM_API_KEY=sk-or-your-api-key-here
+```
    **Windows (PowerShell):**
-   ```powershell
-   $env:OPENAI_API_KEY="sk-your-api-key-here"
-   ```
+```powershell
+   $env:LLM_API_KEY="sk-or-your-api-key-here"
+```
 
-   **Note:** The default model is `gpt-4o-mini` (cheapest option). No changes needed unless you want a different model. To use a different model, also set `OPENAI_MODEL`:
-   ```bash
-   export OPENAI_MODEL="gpt-4o"
-   ```
+3. **(Optional) Choose a different LLM model**
+
+   The default model is `openai/gpt-4o-mini` (cost-effective). You can use **any model available on OpenRouter**.
+   
+   Browse available models at: https://openrouter.ai/models
+   
+   To use a different model, also set `LLM_MODEL`:
+```bash
+   export LLM_MODEL="anthropic/claude-3.5-sonnet"
+```
+   
+   **Popular model examples:**
+   - `openai/gpt-4o-mini` (default, cheap)
+   - `openai/gpt-4o` (more capable)
+   - `anthropic/claude-3.5-sonnet` (great for reasoning)
+   - `google/gemini-pro-1.5` (large context)
+   - `meta-llama/llama-3.1-70b-instruct` (open source)
 
 ### Start the application
 
@@ -46,7 +57,6 @@ If you just want to restart your application, run the command without the `--bui
 - **Backend (API Docs):** http://localhost:8000/docs
 
 ### Stop the application
-
 ```bash
 docker compose down
 ```
