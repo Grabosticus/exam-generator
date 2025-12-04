@@ -103,11 +103,13 @@ async def generateExam(course_id: int, n_questions: int = Query(20, ge=1, le=40)
         old_exam_questions: list[Question] = vector_db.retrieve_old_exam_questions(course_id=course_id, query=topics)
         
         # 2) Query LLM for new exam questions
+        course = course_service.get_course(course_id)
         new_questions: list[Question] = question_generator.generate_questions(
-            course_id=course_id, 
-            relevant_course_material=relevant_course_material, 
-            old_questions=old_exam_questions, 
-            n_new_questions=n_questions
+            course_id=course_id,
+            relevant_course_material=relevant_course_material,
+            old_questions=old_exam_questions,
+            n_new_questions=n_questions,
+            course_name=course.name
         )
 
         # 3) Generate a new exam PDF based on the generated questions
