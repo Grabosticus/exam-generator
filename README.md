@@ -61,6 +61,11 @@ If you just want to restart your application, run the command without the `--bui
 docker compose down
 ```
 
+## Things we could/should improve in the 2nd spring
+
+VectorDB: I noticed, that in `test3_...` in `vector_db_test.py`, the query `"Reinforcement Learning"` does not return
+the old exam questions that are intuitively closest to the query: The ones about PPO and GRPO. This could be because the embeddings which are calculated for the exam question chunks contain a lot of noise. Maybe we can find a way to only store embeddings, which capture the essence of the questions, by e.g. only storing the question, without the answer keys or only storing the `topic` metadata property, should it exist.
+
 ## Code Explanation in Use Cases
 
 ### A User uploads course material/an old exam

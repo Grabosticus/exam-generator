@@ -13,17 +13,18 @@ This class handles all interaction with our vector database.
 class VectorDB:
 
     # build your constructor here
-    def __init__(self):
+    def __init__(self, db_path="data/chroma"):
         api_key = os.environ.get("LLM_API_KEY")
         if not api_key:
             raise ValueError("LLM_API_KEY environment variable is not set")
 
-        self.embedding_function= embedding_functions.OpenAIEmbeddingFunction(
+        self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+            api_base="https://openrouter.ai/api/v1",
             api_key=api_key,
             model_name="text-embedding-3-small"
         )
 
-        self.client = chromadb.PersistentClient(path="data/chroma")
+        self.client = chromadb.PersistentClient(path=db_path)
         self.course_material_collection = self.client.get_or_create_collection(
             name="course_material",
             metadata={"hnsw:space": "cosine"},
@@ -118,7 +119,7 @@ class VectorDB:
             combined_metadata = {
                 "course_id": str(chunk.course_id),
                 "chunk_ind": chunk.chunk_ind,
-                "question_type": str(chunk.question_type),
+                "question_type": chunk.question_type.value,
                 **metadata_entry
             }
             metadatas.append(combined_metadata)
@@ -276,3 +277,38 @@ class VectorDB:
 
         print(f"Successfully retrieved old exam questions for query {query}")
         return questions
+    
+    """
+    Deletes the data associated with a specific course id.
+    I used this only for testing
+    """
+    def delete_course_data(self, course_id: int) -> None:
+        print(f"Deleting all material for course_id {course_id}")
+
+        filter = {"course_id": str(course_id)}
+        
+        material_results = self.course_material_collection.get(
+            where=filter,
+            include=[]
+        )
+        if material_results['ids']:
+            self.course_material_collection.delete(ids=material_results['ids'])
+        
+        exam_results = self.old_exam_collection.get(
+            where=filter,
+            include=[]
+        )
+        if exam_results['ids']:
+            self.old_exam_collection.delete(ids=exam_results['ids'])
+        
+        print(f"Deleted all material for course_id {course_id}")
+
+
+    """
+    Deletes all collections.
+    I also only used this for testing
+    """
+    def delete_collections(self):
+        print("Deleting all collections...")
+        self.client.delete_collection("course_material")
+        self.client.delete_collection("old_exam_collection")
