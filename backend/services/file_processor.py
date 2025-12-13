@@ -23,6 +23,13 @@ class FileProcessor:
     Currently, no metadata is extracted for both the course material and exam questions.
         --> Think of different metadata that you could extract from the course material
         --> Think of different metadata that you could extract from the exam questions
+    
+    Since the "text" property of `ExamQuestionChunk` contains both the questions as well as its answer keys
+    for multiple/single-choice questions, find a way to seperate them. If you use an AI to extract the PDF text,
+    just tell it to format the text such that the answer keys come after some seperator like "[ANSWER_KEYS]",
+    and that the individual answer keys should have a seperator as well, such as "[SEP]"
+       --> e.g. ExamQuestionChunk.text = "What is 1+1? [ANSWER_KEYS] A) 2 [SEP] B) 5 [SEP] C) 1"
+
 
 
     Input:
