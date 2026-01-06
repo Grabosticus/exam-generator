@@ -17,10 +17,11 @@ class CourseService:
         return 1 if last_highest is None else int(last_highest["course_id"]) + 1
 
     # creates a new course with the specified name
-    def create_course(self, name: str) -> None:
+    def create_course(self, name: str) -> Course:
         course_id = self._get_next_course_id()
         course = {"course_id": course_id, "name": name}
         self.collection.insert_one(course)
+        return Course(course_id=course_id, name=course["name"])
 
     # returns a list of all courses
     def get_course_list(self) -> list[Course]:
