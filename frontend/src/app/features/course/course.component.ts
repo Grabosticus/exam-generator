@@ -15,12 +15,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
   styleUrls: ['./course.component.scss']
 })
 export class CourseComponent {
-  
+
   course!: Course;
   courseId!: number;
 
   private apiUrl = 'http://localhost:8000/courses';
-    
+
   showAddModalMaterial = false;
   showAddModalExam = false;
 
@@ -32,10 +32,10 @@ export class CourseComponent {
   isExam = false;
 
   numberOfQuestions: number | null = null;
-  topics: string = ""; 
+  topics: string = "";
 
   constructor(private router: ActivatedRoute, private courseService: CourseService, private http: HttpClient) {}
-  
+
   ngOnInit(): void {
     this.courseId = Number(this.router.snapshot.paramMap.get('id'));
 
@@ -70,14 +70,14 @@ export class CourseComponent {
     }
 
     let type: string | null=null;
-    if (this.isSlide) type = "slide";
-    if (this.isNote) type = "note";
+    if (this.isSlide) type = "slides";
+    if (this.isNote) type = "notes";
     if (this.isExam) type = "exam";
 
     if (!type) {
       alert("Please select a type (slide/note/exam");
       return;
-    }  
+    }
 
     const formData = new FormData();
     formData.append('file', this.selectedFile);
@@ -119,15 +119,15 @@ export class CourseComponent {
       });
     } else {
         this.http.post(
-        `${this.apiUrl}/${this.courseId}/generate`, 
-        null, 
-        { 
-          params, responseType: 'blob' 
+        `${this.apiUrl}/${this.courseId}/generate`,
+        null,
+        {
+          params, responseType: 'blob'
         }
       ).subscribe({
         next: (pdfFile: Blob) => {
-          this.examFile = pdfFile; 
-          this.downloadPdf(pdfFile); 
+          this.examFile = pdfFile;
+          this.downloadPdf(pdfFile);
           this.closeAddModalExam();
         },
         error: err => {
@@ -135,16 +135,16 @@ export class CourseComponent {
         }
       });
     }
-    
+
   }
 
   downloadPdf(file: Blob) {
     const url = window.URL.createObjectURL(file);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `exam_${this.courseId}.pdf`;   
+    a.download = `exam_${this.courseId}.pdf`;
     a.click();
     window.URL.revokeObjectURL(url);
   }
-  
+
 }

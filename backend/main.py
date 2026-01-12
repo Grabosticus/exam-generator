@@ -19,7 +19,7 @@ from services.course_service import CourseService
 from models.course_material_type import CourseMaterialType
 from models.course_material_chunk import CourseMaterialChunk
 from models.question import Question
-from models.course import CourseModel, Course
+from models.course import CourseModel, Course, CourseCreateDTO
 from models.course_material import CourseMaterial
 from models.exam_question_chunk import ExamQuestionChunk
 
@@ -91,9 +91,9 @@ logger = logging.getLogger(__name__)
 
 # POST Endpoint: Creates a new course with `name`
 @app.post("/courses", status_code=201)
-async def createCourse(name: str):
+async def createCourse(course_create: CourseCreateDTO):
     try:
-        course_service.create_course(name=name)
+        course_service.create_course(name=course_create.name)
         return Response(status_code=201)
     except ValueError as e:
         # duplicate name or other validation issue

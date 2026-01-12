@@ -15,3 +15,7 @@ This class is used to return courses to the frontend.
 class CourseModel(BaseModel):
     course_id: int
     name: str
+
+
+class CourseCreateDTO(BaseModel):
+    name: str
