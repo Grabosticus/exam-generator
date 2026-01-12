@@ -4,3 +4,10 @@ pymongo
 chromadb
 python-multipart
 openai
+pypdf
+fpdf
+pytest
+mongomock
+pytesseract
+Pillow
+PyMuPDF

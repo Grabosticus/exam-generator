@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import os
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -10,12 +11,36 @@ from models.exam_question_chunk import ExamQuestionChunk
 from models.question import Question
 from models.question_type import QuestionType
 
+
+class _DummyEmbeddingFunction:
+    def __call__(self, input):
+        return [[0.0, 0.0, 0.0] for _ in input]
+
+    def name(self):
+        return "default"
+
+    def is_legacy(self):
+        return False
+
+    def embed_query(self, input):
+        return self.__call__(input)
+
+    def embed_documents(self, input):
+        return self.__call__(input)
+
+    @property
+    def supported_spaces(self):
+        return ["cosine"]
+
 def test1_adding_and_retrieving_course_material_chunks_without_query():
+
+    # Ensure embedding function has an API key in test context
+    os.environ.setdefault("LLM_API_KEY", "test-key")
 
     print(f"\nTEST 1: Adding and retrieving course material chunks without query\n")
 
     # Arrange
-    vector_db = VectorDB(db_path="data/test")
+    vector_db = VectorDB(db_path="data/test", embedding_function=_DummyEmbeddingFunction(), require_api_key=False)
     course_id = 567539432943783438
 
     chunk_1 = CourseMaterialChunk(
@@ -70,10 +95,12 @@ def test1_adding_and_retrieving_course_material_chunks_without_query():
 
 def test2_adding_and_retrieving_old_exam_questions_without_query():
 
+    os.environ.setdefault("LLM_API_KEY", "test-key")
+
     print(f"\nTEST 2: Adding and retrieving old exam questions without query\n")
 
     # Arrange
-    vector_db = VectorDB(db_path="data/test")
+    vector_db = VectorDB(db_path="data/test", embedding_function=_DummyEmbeddingFunction(), require_api_key=False)
     course_id = 567539432943783438
 
     chunk_1 = ExamQuestionChunk(
@@ -128,10 +155,12 @@ def test2_adding_and_retrieving_old_exam_questions_without_query():
 
 def test3_adding_and_retrieving_old_exam_questions_with_query():
 
+    os.environ.setdefault("LLM_API_KEY", "test-key")
+
     print(f"\nTEST 3: ADDING AND RETRIEVING OLD EXAM QUESTIONS WITH QUERY")
 
     # Arrange
-    vector_db = VectorDB(db_path="data/test")
+    vector_db = VectorDB(db_path="data/test", embedding_function=_DummyEmbeddingFunction(), require_api_key=False)
     course_id = 567539432943783438
 
     chunk_1 = ExamQuestionChunk(

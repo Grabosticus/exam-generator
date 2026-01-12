@@ -1,4 +1,9 @@
 services:
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
   backend:
     build: ./backend
     container_name: backend
@@ -6,10 +11,24 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      # Named volumes to allow docker compose down -v to clear vector DB data
+      - chroma_data:/app/data/chroma
+      - chroma_test_data:/app/data/test
+    depends_on:
+      - mongo
     environment:
-      - LLM_API_KEY=${LLM_API_KEY}
-      - LLM_MODEL=${LLM_MODEL:-openai/gpt-4o-mini}
-
+      MONGO_URL: ${MONGO_URL:-mongodb://mongo:27017}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL:-openai/gpt-4o-mini}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      OCR_ENABLED: ${OCR_ENABLED:-true}
+      OCR_MAX_IMAGES_PER_PAGE: ${OCR_MAX_IMAGES_PER_PAGE:-50}
+      OCR_MIN_TEXT_FOR_OCR: ${OCR_MIN_TEXT_FOR_OCR:-0}
+      OCR_MAX_DIM: ${OCR_MAX_DIM:-5000}
+      OCR_MIN_DIM: ${OCR_MIN_DIM:-200}
+      OCR_PSM: ${OCR_PSM:-3}
+      OCR_WORKERS: ${OCR_WORKERS:-16}
+      OCR_LOG_TEXT: ${OCR_LOG_TEXT:-false}
   frontend:
     build: ./frontend
     container_name: frontend
@@ -22,3 +41,7 @@ services:
       - backend
     environment:
       - BACKEND_BASE_URL=http://backend:8000
+
+volumes:
+  chroma_data:
+  chroma_test_data:
