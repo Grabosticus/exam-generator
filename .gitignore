@@ -1,10 +1,40 @@
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.coverage
+.pytest_cache/
 
 .venv/
 venv/
+env/
+*.egg-info/
 
 .idea/
 .vscode/
+
+# Environment files
+.env
+backend/.env
+frontend/.env
+
+# Local data
+data/
+backend/data/chroma/
+backend/data/test/
+backend/data/**/*.pdf
+
+# Logs
+*.log
+
+# Frontend (Angular)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.cache/
+frontend/.env
+
+# OS noise
+.DS_Store
 
 chroma/

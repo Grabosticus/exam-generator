@@ -1,11 +1,13 @@
 import chromadb
+import logging
+import os
+import time
 from chromadb.utils import embedding_functions
 from models.course_material_chunk import CourseMaterialChunk
 from models.exam_question_chunk import ExamQuestionChunk
 from models.course_material import CourseMaterial
 from models.question import Question
 from models.question_type import QuestionType
-import os
 
 """
 This class handles all interaction with our vector database.
@@ -13,16 +15,19 @@ This class handles all interaction with our vector database.
 class VectorDB:
 
     # build your constructor here
-    def __init__(self, db_path="data/chroma"):
+    def __init__(self, db_path="data/chroma", embedding_function=None, require_api_key: bool = True):
         api_key = os.environ.get("LLM_API_KEY")
-        if not api_key:
-            raise ValueError("LLM_API_KEY environment variable is not set")
+        self._logger = logging.getLogger(__name__)
+        if embedding_function is None:
+            if require_api_key and not api_key:
+                raise ValueError("LLM_API_KEY environment variable is not set")
+            embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+                api_base="https://openrouter.ai/api/v1",
+                api_key=api_key,
+                model_name="text-embedding-3-small"
+            )
 
-        self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-            api_base="https://openrouter.ai/api/v1",
-            api_key=api_key,
-            model_name="text-embedding-3-small"
-        )
+        self.embedding_function = embedding_function
 
         self.client = chromadb.PersistentClient(path=db_path)
         self.course_material_collection = self.client.get_or_create_collection(
@@ -58,7 +63,7 @@ class VectorDB:
         metadata... Metadata of the course material chunks e.g. [{'topic': 'grpo', 'has_images': true}, {'topic': 'ppo', 'has_images': false}, ...]
     """
     def index_course_material(self, chunks: list[CourseMaterialChunk], metadata: list[dict]) -> None:
-        print("Storing course material in VectorDB...")
+        self._logger.info("Indexing course material chunks=%s", len(chunks))
 
         if len(metadata) != len(chunks):
             raise ValueError("Error! Metadata list is not as long as the chunks list")
@@ -78,6 +83,7 @@ class VectorDB:
             metadatas.append(combined_metadata)
 
         batch_size = 64
+        start_time = time.time()
         for i in range(0, len(ids), batch_size):
             effective_batch_size = batch_size
             if len(ids) - i < batch_size:
@@ -87,13 +93,20 @@ class VectorDB:
             batch_documents = documents[i:i + effective_batch_size]
             batch_metadata = metadatas[i:i + effective_batch_size]
 
+            batch_start = time.time()
             self.course_material_collection.add(
                 ids=batch_ids,
                 documents=batch_documents,
                 metadatas=batch_metadata
             )
+            self._logger.debug(
+                "Indexed course material batch size=%s offset=%s duration=%.2fs",
+                len(batch_ids),
+                i,
+                time.time() - batch_start,
+            )
         
-        print("Successfully stored course material in VectorDB!")
+        self._logger.info("Indexed course material complete total=%s duration=%.2fs", len(ids), time.time() - start_time)
 
 
     """
@@ -104,7 +117,7 @@ class VectorDB:
         metadata... Metadata of the exam question chunks e.g. [{'topic': 'grpo'}, {'topic': 'transformers'}, ...]
     """
     def index_old_exam_questions(self, chunks: list[ExamQuestionChunk], metadata: list[dict]) -> None:
-        print("Storing old exam questions in VectorDB...")        
+        self._logger.info("Indexing old exam questions chunks=%s", len(chunks))        
 
         if len(chunks) != len(metadata):
             raise ValueError("Error! Metadata list is not as long as the chunks list")
@@ -125,6 +138,7 @@ class VectorDB:
             metadatas.append(combined_metadata)
         
         batch_size = 64
+        start_time = time.time()
         for i in range(0, len(ids), batch_size):
             effective_batch_size = batch_size
             if len(ids) - i < batch_size:
@@ -134,13 +148,20 @@ class VectorDB:
             batch_documents = documents[i:i + effective_batch_size]
             batch_metadata = metadatas[i:i + effective_batch_size]
             
+            batch_start = time.time()
             self.old_exam_collection.add(
                 ids=batch_ids,
                 documents=batch_documents,
                 metadatas=batch_metadata
             )
+            self._logger.debug(
+                "Indexed old exam batch size=%s offset=%s duration=%.2fs",
+                len(batch_ids),
+                i,
+                time.time() - batch_start,
+            )
 
-        print("Successfully stored old exam questions in VectorDB!")
+        self._logger.info("Indexed old exam questions complete total=%s duration=%.2fs", len(ids), time.time() - start_time)
 
     
     """
@@ -155,7 +176,7 @@ class VectorDB:
         A list of `CourseMaterial`
     """
     def retrieve_course_material(self, course_id: int, query: str | None = None, n: int = 10) -> list[CourseMaterial]:
-        print("Retrieving old course material from VectorDB...")
+        self._logger.info("Retrieving course material course_id=%s query=%s n=%s", course_id, query, n)
 
         filter = {"course_id": str(course_id)}
 
@@ -174,7 +195,7 @@ class VectorDB:
                         CourseMaterial(text=results["documents"][i], metadata=results["metadatas"][i])
                     )
             
-            print("Successfully retrieved old course material!")
+            self._logger.info("Retrieved course material course_id=%s count=%s", course_id, len(course_materials))
             return course_materials
         
         # when we have a query, we filter by it
@@ -194,8 +215,8 @@ class VectorDB:
                 course_materials.append(
                     CourseMaterial(text=results["documents"][0][i], metadata=metadata)
                 )
-
-        print(f"Successfully retrieved old course material with query {query}")
+        
+        self._logger.info("Retrieved course material course_id=%s count=%s query=%s", course_id, len(course_materials), query)
         return course_materials
 
 
@@ -211,7 +232,7 @@ class VectorDB:
         A list of `Question`
     """
     def retrieve_old_exam_questions(self, course_id: int, query: str | None = None, n: int = 10) -> list[Question]:
-        print("Retrieving old exam questions from VectorDB...")
+        self._logger.info("Retrieving old exam questions course_id=%s query=%s n=%s", course_id, query, n)
 
         filter = {"course_id": str(course_id)}
 
@@ -243,7 +264,7 @@ class VectorDB:
                         Question(question=question, question_type=question_type, metadata=metadata, answer_keys=answer_keys)
                     )
                 
-            print("Successfully retrieved old exam questions")
+            self._logger.info("Retrieved old exam questions course_id=%s count=%s", course_id, len(questions))
             return questions
             
         # we filter by the query
@@ -274,8 +295,8 @@ class VectorDB:
                 questions.append(
                     Question(question=question, question_type=question_type, metadata=metadata, answer_keys=answer_keys)
                 )
-
-        print(f"Successfully retrieved old exam questions for query {query}")
+        
+        self._logger.info("Retrieved old exam questions course_id=%s count=%s query=%s", course_id, len(questions), query)
         return questions
     
     """
@@ -283,7 +304,7 @@ class VectorDB:
     I used this only for testing
     """
     def delete_course_data(self, course_id: int) -> None:
-        print(f"Deleting all material for course_id {course_id}")
+        self._logger.info("Deleting all material for course_id %s", course_id)
 
         filter = {"course_id": str(course_id)}
         
@@ -301,7 +322,7 @@ class VectorDB:
         if exam_results['ids']:
             self.old_exam_collection.delete(ids=exam_results['ids'])
         
-        print(f"Deleted all material for course_id {course_id}")
+        self._logger.info("Deleted all material for course_id %s", course_id)
 
 
     """
@@ -309,6 +330,6 @@ class VectorDB:
     I also only used this for testing
     """
     def delete_collections(self):
-        print("Deleting all collections...")
+        self._logger.info("Deleting all collections...")
         self.client.delete_collection("course_material")
         self.client.delete_collection("old_exam_collection")
