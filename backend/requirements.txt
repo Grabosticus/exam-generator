@@ -11,3 +11,4 @@ mongomock
 pytesseract
 Pillow
 PyMuPDF
+reportlab

@@ -1,6 +1,6 @@
-import os
 from models.course import Course
 from pymongo import MongoClient, errors
+import os
 
 """
 This class handles all requests that are made regarding creating/returning courses.
@@ -26,7 +26,7 @@ class CourseService:
         return 1 if last_highest is None else int(last_highest["course_id"]) + 1
 
     # creates a new course with the specified name
-    def create_course(self, name: str) -> None:
+    def create_course(self, name: str) -> Course:
         existing = self.collection.find_one({"name": name})
         if existing:
             raise ValueError(f"Course with name '{name}' already exists")
@@ -34,6 +34,7 @@ class CourseService:
         course = {"course_id": course_id, "name": name}
         try:
             self.collection.insert_one(course)
+            return Course(course_id=course_id, name=course["name"])
         except errors.DuplicateKeyError:
             # Race condition fallback: surface as ValueError consistent with manual check
             raise ValueError(f"Course with name '{name}' already exists")

@@ -42,6 +42,8 @@ class VectorDB:
             embedding_function=self.embedding_function
         )
 
+    def clean_md(self, md: dict) -> dict:
+        return {k: v for k, v in md.items() if v is not None}
     
     """
     Embeds a list of text with some embedding model.
@@ -73,6 +75,7 @@ class VectorDB:
         metadatas = []
 
         for chunk, metadata_entry in zip(chunks, metadata):
+            metadata_entry = self.clean_md(metadata_entry)
             ids.append(chunk.id)
             documents.append(chunk.text)
             combined_metadata = {
@@ -127,6 +130,7 @@ class VectorDB:
         metadatas = []
         
         for chunk, metadata_entry in zip(chunks, metadata):
+            metadata_entry = self.clean_md(metadata_entry)
             ids.append(chunk.id)
             documents.append(chunk.text)
             combined_metadata = {
