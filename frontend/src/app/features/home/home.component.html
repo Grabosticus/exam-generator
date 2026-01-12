@@ -1,0 +1,44 @@
+<div class="home-container">
+  <h1>Courses</h1>
+
+  <div class="search-bar">
+    <input 
+      type="text" 
+      placeholder="Search for course..." 
+      [(ngModel)]="searchTerm"
+      (input)="filterCourses()"
+    />
+  </div>
+
+  <div class="courses">
+    <div class="course-card add-card" (click)="openAddModal()">
+      +
+    </div>
+    
+    <div class="course-card" *ngFor="let course of filteredCourses">
+      <a [routerLink]="['/course', course.course_id]">{{ course.name }}</a>
+    </div>
+    
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showAddModal">
+    <div class="modal">
+      <h2>Add new Course</h2>
+
+      <form (ngSubmit)="addCourse()">
+        <input
+          type="text"
+          placeholder="Course name..."
+          [(ngModel)]="newCourseName"
+          name="courseName"
+          required
+        />
+        
+        <div class="buttons">
+          <button type="button" (click)="closeAddModal()">Cancel</button>
+          <button type="submit">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

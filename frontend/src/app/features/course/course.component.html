@@ -1,0 +1,90 @@
+<div class="course-container"> 
+    <h1>{{ course?.name }}</h1>
+
+    <div class="material-container">
+        <h2>Material</h2>
+        <div class="sub-container">
+            <div class="add-card material-add" (click)="openAddModalMaterial()">
+            +
+            </div>
+            <label class="add-information">upload new material for the subject</label>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" *ngIf="showAddModalMaterial">
+        <div class="modal material">
+            <h2>Add new Material</h2>
+
+            <form (ngSubmit)="addMaterial()">
+                <input class="file-input"
+                type="file"
+                accept=".pdf"
+                (change)="onFileSelected($event)"
+                required
+                />
+
+                <div class="checkboxes">
+                    <label>
+                        <input type="checkbox" [(ngModel)]="isSlide" name="isSlide"/>
+                        slide
+                    </label>    
+                    <label>
+                        <input type="checkbox" [(ngModel)]="isNote" name="isNote"/>
+                        note
+                    </label>  
+                    <label>
+                        <input type="checkbox" [(ngModel)]="isExam" name="isExam"/>
+                        exam
+                    </label>    
+                </div>
+                
+                <div class="buttons">
+                <button type="button" (click)="closeAddModalMaterial()">Cancel</button>
+                <button type="submit">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="exam-container">
+        <h2>Exams</h2>
+        <div class="sub-container">
+            <div class="add-card exams-add" (click)="openAddModalExam()">
+            +
+            </div>
+            <label class="add-information">generate new exam</label>   
+        </div>
+    </div>
+
+    <div class="modal-backdrop" *ngIf="showAddModalExam">
+        <div class="modal exam">
+            <h2>Generate new Exam</h2>
+
+            <form (ngSubmit)="generateExam()">
+                <div class="exam-input">
+                    <label for="numberOfQuestions">number of questions (optional):</label>
+                    <input
+                    type="number"
+                    [(ngModel)]="numberOfQuestions"
+                    name="enumberOfQuestions"
+                    min="1"
+                    />
+
+                    <label for="topics">topics (optional):</label>
+                    <input
+                    type="text"
+                    placeholder="possible topics..."
+                    [(ngModel)]="topics"
+                    name="topics"
+                    />
+                </div>
+                
+                <div class="buttons">
+                <button type="button" (click)="closeAddModalExam()">Cancel</button>
+                <button type="submit">Generate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
