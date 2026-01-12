@@ -5,6 +5,7 @@ import os
 import sys
 import logging
 from dataclasses import asdict
+from fastapi.middleware.cors import CORSMiddleware
 # Ensure local services/ and models/ are importable when running directly (uvicorn backend.main:app)
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
@@ -71,6 +72,16 @@ course_service = CourseService()
 ################################## (Also initializing these services here is kind of dirty, but I didn't care)
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:4200",  # Our Frontend
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 logger = logging.getLogger(__name__)
 
 # TODO:

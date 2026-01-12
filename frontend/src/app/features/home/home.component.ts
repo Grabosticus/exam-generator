@@ -53,7 +53,7 @@ export class HomeComponent implements OnInit {
   addCourse() {
     if (!this.newCourseName.trim()) return;
 
-    this.courseService.addCourse({ name: this.newCourseName }).subscribe({
+    this.courseService.addCourse(this.newCourseName).subscribe({
       next: course => {
         this.courses.push(course);
         this.closeAddModal();
@@ -63,7 +63,7 @@ export class HomeComponent implements OnInit {
       error: err => console.error('error while adding new course', err)
     });
 
-    
+
   }
 }
 

@@ -22,7 +22,7 @@ export class CourseService {
   }
 
   // POST /courses
-  addCourse(course: Partial<Course>): Observable<Course> {
+  addCourse(course: string): Observable<Course> {
     return this.http.post<Course>(this.apiUrl, course);
   }
 
