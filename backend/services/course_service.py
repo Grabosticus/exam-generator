@@ -1,5 +1,6 @@
 from models.course import Course
 from pymongo import MongoClient, errors
+import os
 
 """
 This class handles all requests that are made regarding creating/returning courses.
