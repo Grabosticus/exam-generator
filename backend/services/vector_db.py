@@ -8,6 +8,7 @@ from models.exam_question_chunk import ExamQuestionChunk
 from models.course_material import CourseMaterial
 from models.question import Question
 from models.question_type import QuestionType
+import random
 
 """
 This class handles all interaction with our vector database.
@@ -179,24 +180,29 @@ class VectorDB:
     Output:
         A list of `CourseMaterial`
     """
-    def retrieve_course_material(self, course_id: int, query: str | None = None, n: int = 10) -> list[CourseMaterial]:
+    def retrieve_course_material(self, course_id: int, query: str | None = None, n: int = 15) -> list[CourseMaterial]:
         self._logger.info("Retrieving course material course_id=%s query=%s n=%s", course_id, query, n)
 
         filter = {"course_id": str(course_id)}
+        pool_size = n * 10  # when we have no query, we sample n * 10 entries from the DB and then select random entries out of that
 
         # if there is no query we just return the top n results without any semantic search
         if query is None or query.strip() == "":
             results = self.course_material_collection.get(
                 where=filter,
-                limit=n,
+                limit=pool_size,
+                offset=random.randrange(0, max(1, self.course_material_collection.count() - pool_size + 1)),
                 include=["documents", "metadatas"]
             )
 
             course_materials = []
             if results["ids"]:
-                for i in range(len(results["ids"])):
+                idx = random.sample(range(len(results["ids"])), k=min(n, len(results["ids"])))
+                random_results = {k: [results[k][i] for i in idx] for k in ("ids", "documents", "metadatas")}
+
+                for i in range(len(random_results["ids"])):
                     course_materials.append(
-                        CourseMaterial(text=results["documents"][i], metadata=results["metadatas"][i])
+                        CourseMaterial(text=random_results["documents"][i], metadata=random_results["metadatas"][i])
                     )
             
             self._logger.info("Retrieved course material course_id=%s count=%s", course_id, len(course_materials))
@@ -235,28 +241,33 @@ class VectorDB:
     Output:
         A list of `Question`
     """
-    def retrieve_old_exam_questions(self, course_id: int, query: str | None = None, n: int = 10) -> list[Question]:
+    def retrieve_old_exam_questions(self, course_id: int, query: str | None = None, n: int = 15) -> list[Question]:
         self._logger.info("Retrieving old exam questions course_id=%s query=%s n=%s", course_id, query, n)
 
         filter = {"course_id": str(course_id)}
+        pool_size = n * 10  # when we have no query, we sample n * 10 entries from the DB and then select random entries out of that to improve lecture coverage
 
         # we just retrieve n old questions
         if query is None or query.strip() == "":
             results = self.old_exam_collection.get(
                 where=filter,
-                limit=n,
+                limit=pool_size,
+                offset=random.randrange(0, max(1, self.course_material_collection.count() - pool_size + 1)),
                 include=["documents", "metadatas"]
             )
 
             questions = []
             if results["ids"]:
-                for i in range(len(results["ids"])):
-                    metadata = results["metadatas"][i].copy()
+                idx = random.sample(range(len(results["ids"])), k=min(n, len(results["ids"])))
+                random_results = {k: [results[k][i] for i in idx] for k in ("ids", "documents", "metadatas")}
+
+                for i in range(len(random_results["ids"])):
+                    metadata = random_results["metadatas"][i].copy()
 
                     question_type = metadata.pop("question_type")
                     question_type = QuestionType(question_type)
 
-                    question_and_answers = results["documents"][i].split("[ANSWER_KEYS]")
+                    question_and_answers = random_results["documents"][i].split("[ANSWER_KEYS]")
                     question = question_and_answers[0]
                     if len(question_and_answers) > 1:
                         answer_keys_str = question_and_answers[1].strip()

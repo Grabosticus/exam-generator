@@ -34,6 +34,12 @@
   }
 }
 
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(30%);
+}
+
 // Not Found Container
 .not-found-container {
   display: flex;

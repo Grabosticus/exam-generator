@@ -78,7 +78,7 @@ Your task is to generate {n_new_questions} new exam questions based on the provi
 1. Generate exactly {n_new_questions} new questions
 2. Use a mix of question types: multiple-choice, single-choice, and text-answer
 3. Questions should cover the topics from the course material
-4. Match the style and difficulty of the example questions
+4. Match the style and difficulty of the example questions. Your generated questions should ideally be indistinguishable from the style of questions given in the example questions.
 5. For multiple-choice and single-choice questions, provide 4 answer options
 
 === OUTPUT FORMAT ===

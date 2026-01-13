@@ -234,7 +234,7 @@ export class CourseComponent {
     const url = window.URL.createObjectURL(file);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `exam_${this.courseId}.pdf`;
+    a.download = `exam_${this.course.name.replace(" ", "_")}.pdf`;
     a.click();
     window.URL.revokeObjectURL(url);
   }
