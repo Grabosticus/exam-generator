@@ -64,7 +64,7 @@ class QuestionGenerator:
             if q.metadata:
                 old_questions_text += f"Metadata: {q.metadata}\n"
 
-        prompt = f"""You are an exam question generator for the university course {course_identifier}.
+        prompt = f"""You are a professor teaching the TU Wien course {course_identifier}. Your task is to create a new exam for this course.
 
 Your task is to generate {n_new_questions} new exam questions based on the provided course material.The new questions should be similar in style and difficulty to the example questions provided.
 
@@ -80,6 +80,7 @@ Your task is to generate {n_new_questions} new exam questions based on the provi
 3. Questions should cover the topics from the course material
 4. Match the style and difficulty of the example questions. Your generated questions should ideally be indistinguishable from the style of questions given in the example questions.
 5. For multiple-choice and single-choice questions, provide 4 answer options
+6. Ensure every question is clear and self-contained. If a question refers to a function, include the full function definition (or the relevant code snippet) directly in the question.
 
 === OUTPUT FORMAT ===
 Return a valid JSON array with the following structure for each question:
