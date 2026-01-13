@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, File, Response, Query, HTTPException
+from fastapi import FastAPI, UploadFile, File, Response, Query, HTTPException, status
+from fastapi.responses import JSONResponse
 from typing import BinaryIO
 import io
 import os
@@ -16,6 +17,7 @@ from services.vector_db import VectorDB
 from services.question_generator import QuestionGenerator
 from services.pdf_generator import PDFGenerator
 from services.course_service import CourseService
+from services.hash_db import HashDB
 from models.course_material_type import CourseMaterialType
 from models.course_material_chunk import CourseMaterialChunk
 from models.question import Question
@@ -69,6 +71,7 @@ vector_db = VectorDB()
 question_generator = QuestionGenerator()
 pdf_generator = PDFGenerator()
 course_service = CourseService()
+hash_db = HashDB()
 ################################## (Also initializing these services here is kind of dirty, but I didn't care)
 
 app = FastAPI()
@@ -84,17 +87,12 @@ app.add_middleware(
 
 logger = logging.getLogger(__name__)
 
-# TODO:
-# upload material -> check if material has already been uploaded via hashing it and looking into our mongo hash db
-# if already uploaded, don't do anything
-# also don't allow user to upload generated exams. Store the hash of generated exams in a db too and check
-
 # POST Endpoint: Creates a new course with `name`
 @app.post("/courses", status_code=201)
 async def createCourse(course_create: CourseCreateDTO):
     try:
-        course_service.create_course(name=course_create.name)
-        return Response(status_code=201)
+        createdCourse = course_service.create_course(name=course_create.name)
+        return createdCourse
     except ValueError as e:
         # duplicate name or other validation issue
         raise HTTPException(status_code=409, detail=str(e))
@@ -125,6 +123,12 @@ Input:
 """
 @app.post("/courses/{course_id}/upload/{material_type}", status_code=200)
 async def uploadFile(course_id: int, material_type: CourseMaterialType, file: UploadFile = File(...)):
+    file_hash = await hash_db.compute_file_hash(file)
+    saved_file_hash = hash_db.get_file_hash(course_id=course_id, hash=file_hash)
+    if saved_file_hash is not None:
+        message = get_conflict_message(material_type=saved_file_hash["type"])
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"detail": message})
+
     pdf_bytes = await file.read()
     pdf_stream: BinaryIO = io.BytesIO(pdf_bytes)
 
@@ -145,6 +149,8 @@ async def uploadFile(course_id: int, material_type: CourseMaterialType, file: Up
             vector_db.index_course_material(course_material_chunks, course_material_metadata)
 
         logger.info("Upload complete course_id=%s material_type=%s chunks=%s", course_id, material_type, len(exam_question_chunks if material_type == CourseMaterialType.EXAM else course_material_chunks))
+        hash_db.add_file_hash(course_id=course_id, hash=file_hash, type=material_type)
+
         return Response(status_code=200)
 
     except KeyError:
@@ -181,6 +187,8 @@ async def generateExam(course_id: int, n_questions: int = Query(20, ge=1, le=40)
 
         # 3) Generate a new exam PDF based on the generated questions
         new_exam_pdf: bytes = pdf_generator.generate_pdf(questions=new_questions, course_id=course_id)
+        bytes_hash = hash_db.compute_bytes_hash(new_exam_pdf)
+        hash_db.add_file_hash(course_id=course_id, hash=bytes_hash, generated=True)
 
         return Response(content=new_exam_pdf, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="new_exam_course_{course_id}.pdf"'})
     
@@ -284,3 +292,13 @@ async def debug_generate_exam(course_id: int, n_questions: int = Query(5, ge=1, 
     except Exception as e:
         logger.exception("Debug generate failed course_id=%s", course_id)
         raise HTTPException(status_code=500, detail=f"Failed to generate exam for course {course_id}: {e}")
+    
+def get_conflict_message(material_type: str):
+    match material_type:
+        case "exam": message = "This past exam has already been uploaded"
+        case "notes": message = "These notes have already been uploaded"
+        case "slides": message = "These slides have already been uploaded"
+        case "generated": message = "You can't upload generated exams"
+        case _: message = "This course material has already been uploaded"
+
+    return message

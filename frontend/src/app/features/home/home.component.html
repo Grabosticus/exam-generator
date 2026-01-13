@@ -1,10 +1,14 @@
 <div class="home-container">
-  <h1>Courses</h1>
+  <div class="hero-section">
+    <h1>Your Courses</h1>
+    <p class="subtitle">Select a course to generate practice exams or create a new one</p>
+  </div>
 
   <div class="search-bar">
-    <input 
-      type="text" 
-      placeholder="Search for course..." 
+    <div class="search-icon">🔍</div>
+    <input
+      type="text"
+      placeholder="Search for a course..."
       [(ngModel)]="searchTerm"
       (input)="filterCourses()"
     />
@@ -12,31 +16,50 @@
 
   <div class="courses">
     <div class="course-card add-card" (click)="openAddModal()">
-      +
+      <div class="add-icon">+</div>
+      <span class="add-text">Create New Course</span>
     </div>
-    
-    <div class="course-card" *ngFor="let course of filteredCourses">
-      <a [routerLink]="['/course', course.course_id]">{{ course.name }}</a>
+
+    <div
+      class="course-card"
+      *ngFor="let course of filteredCourses"
+      [routerLink]="['/course', course.course_id]"
+    >
+      <div class="course-icon">📚</div>
+      <span class="course-name">{{ course.name }}</span>
+      <span class="course-arrow">→</span>
     </div>
-    
   </div>
 
-  <div class="modal-backdrop" *ngIf="showAddModal">
-    <div class="modal">
-      <h2>Add new Course</h2>
+  <div class="empty-state" *ngIf="filteredCourses.length === 0 && searchTerm">
+    <div class="empty-icon">🔍</div>
+    <p>No courses found matching "{{ searchTerm }}"</p>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showAddModal" (click)="closeAddModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Create New Course</h2>
+        <button class="close-btn" (click)="closeAddModal()">×</button>
+      </div>
 
       <form (ngSubmit)="addCourse()">
-        <input
-          type="text"
-          placeholder="Course name..."
-          [(ngModel)]="newCourseName"
-          name="courseName"
-          required
-        />
-        
-        <div class="buttons">
-          <button type="button" (click)="closeAddModal()">Cancel</button>
-          <button type="submit">Add</button>
+        <div class="form-group">
+          <label for="courseName">Course Name</label>
+          <input
+            type="text"
+            id="courseName"
+            placeholder="e.g., Machine Learning 101"
+            [(ngModel)]="newCourseName"
+            name="courseName"
+            required
+            autofocus
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeAddModal()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="!newCourseName.trim()">Create Course</button>
         </div>
       </form>
     </div>

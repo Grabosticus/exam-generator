@@ -6,4 +6,5 @@ import { CourseComponent } from './features/course/course.component';
 export const routes: Routes = [
     { path: '', component: HomeComponent },
     { path: 'course/:id', component: CourseComponent },
+    { path: '**', redirectTo: ''}
 ];

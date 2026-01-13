@@ -54,11 +54,12 @@ export class HomeComponent implements OnInit {
     if (!this.newCourseName.trim()) return;
 
     this.courseService.addCourse(this.newCourseName).subscribe({
-      next: course => {
+      next: (course: Course) => {
+        console.log(course)
         this.courses.push(course);
         this.closeAddModal();
 
-        this.router.navigate(['/course', course.course_id]);
+        this.router.navigateByUrl(`/course/${course.course_id}`);
       },
       error: err => console.error('error while adding new course', err)
     });

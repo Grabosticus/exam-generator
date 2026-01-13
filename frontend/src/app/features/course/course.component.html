@@ -1,90 +1,187 @@
-<div class="course-container"> 
-    <h1>{{ course?.name }}</h1>
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p>Loading course...</p>
+</div>
 
-    <div class="material-container">
-        <h2>Material</h2>
-        <div class="sub-container">
-            <div class="add-card material-add" (click)="openAddModalMaterial()">
-            +
+<!-- Course Not Found State -->
+<div class="not-found-container" *ngIf="!isLoading && courseNotFound">
+    <div class="not-found-card">
+        <div class="not-found-icon">📚</div>
+        <h2>Course Not Found</h2>
+        <p>The course you're looking for doesn't exist or has been removed.</p>
+        <button class="btn-primary" (click)="goHome()">
+            ← Back to Courses
+        </button>
+    </div>
+</div>
+
+<!-- Course Content -->
+<div class="course-container" *ngIf="!isLoading && !courseNotFound">
+    <div class="course-header">
+        <button class="back-btn" (click)="goHome()">← Back</button>
+        <h1>{{ course?.name }}</h1>
+    </div>
+
+    <div class="section material-section">
+        <div class="section-header">
+            <div class="section-icon">📄</div>
+            <h2>Course Materials</h2>
+        </div>
+        <p class="section-description">Upload lecture slides, notes, or past exams to help generate practice questions.</p>
+        
+        <div class="action-card" (click)="openAddModalMaterial()">
+            <div class="action-icon">+</div>
+            <div class="action-text">
+                <span class="action-title">Upload Material</span>
+                <span class="action-subtitle">PDF files supported</span>
             </div>
-            <label class="add-information">upload new material for the subject</label>
         </div>
     </div>
 
-    <div class="modal-backdrop" *ngIf="showAddModalMaterial">
-        <div class="modal material">
-            <h2>Add new Material</h2>
+    <div class="section exam-section">
+        <div class="section-header">
+            <div class="section-icon">📝</div>
+            <h2>Generate Exam</h2>
+        </div>
+        <p class="section-description">Create a new practice exam based on your uploaded course materials.</p>
+        
+        <div class="action-card" (click)="openAddModalExam()">
+            <div class="action-icon">✨</div>
+            <div class="action-text">
+                <span class="action-title">Generate New Exam</span>
+                <span class="action-subtitle">AI-powered question generation</span>
+            </div>
+        </div>
+    </div>
+</div>
 
-            <form (ngSubmit)="addMaterial()">
-                <input class="file-input"
-                type="file"
-                accept=".pdf"
-                (change)="onFileSelected($event)"
-                required
+<!-- Upload Material Modal -->
+<div class="modal-backdrop" *ngIf="showAddModalMaterial" (click)="closeAddModalMaterial()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Upload Material</h2>
+            <button class="close-btn" (click)="closeAddModalMaterial()">×</button>
+        </div>
+
+        <!-- Success Message -->
+        <div class="feedback-message success" *ngIf="uploadSuccess">
+            <div class="feedback-icon">✓</div>
+            <span>File uploaded successfully!</span>
+        </div>
+
+        <!-- Error Message -->
+        <div class="feedback-message error" *ngIf="uploadError">
+            <div class="feedback-icon">!</div>
+            <span>{{ uploadErrorMessage }}</span>
+        </div>
+
+        <!-- Uploading State -->
+        <div class="uploading-state" *ngIf="isUploading">
+            <div class="loading-spinner small"></div>
+            <span>Uploading {{ selectedFileName }}...</span>
+        </div>
+
+        <form (ngSubmit)="addMaterial()" *ngIf="!isUploading && !uploadSuccess">
+            <div class="file-upload-area">
+                <input
+                    type="file"
+                    id="fileInput"
+                    class="file-input-hidden"
+                    accept=".pdf"
+                    (change)="onFileSelected($event)"
                 />
-
-                <div class="checkboxes">
-                    <label>
-                        <input type="checkbox" [(ngModel)]="isSlide" name="isSlide"/>
-                        slide
-                    </label>    
-                    <label>
-                        <input type="checkbox" [(ngModel)]="isNote" name="isNote"/>
-                        note
-                    </label>  
-                    <label>
-                        <input type="checkbox" [(ngModel)]="isExam" name="isExam"/>
-                        exam
-                    </label>    
-                </div>
-                
-                <div class="buttons">
-                <button type="button" (click)="closeAddModalMaterial()">Cancel</button>
-                <button type="submit">Add</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="exam-container">
-        <h2>Exams</h2>
-        <div class="sub-container">
-            <div class="add-card exams-add" (click)="openAddModalExam()">
-            +
+                <label for="fileInput" class="file-upload-label">
+                    <div class="upload-icon">📁</div>
+                    <span *ngIf="!selectedFileName">Choose a PDF file</span>
+                    <span *ngIf="selectedFileName" class="selected-file">{{ selectedFileName }}</span>
+                </label>
             </div>
-            <label class="add-information">generate new exam</label>   
-        </div>
+
+            <div class="material-type-selector">
+                <label class="type-option" [class.selected]="isSlide">
+                    <input type="checkbox" [(ngModel)]="isSlide" name="isSlide" (change)="isNote=false; isExam=false"/>
+                    <span class="type-icon">🎞️</span>
+                    <span>Slides</span>
+                </label>
+                <label class="type-option" [class.selected]="isNote">
+                    <input type="checkbox" [(ngModel)]="isNote" name="isNote" (change)="isSlide=false; isExam=false"/>
+                    <span class="type-icon">📝</span>
+                    <span>Notes</span>
+                </label>
+                <label class="type-option" [class.selected]="isExam">
+                    <input type="checkbox" [(ngModel)]="isExam" name="isExam" (change)="isSlide=false; isNote=false"/>
+                    <span class="type-icon">📋</span>
+                    <span>Past Exam</span>
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" (click)="closeAddModalMaterial()">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="!isExam && !isNote && !isSlide">Upload</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="modal-backdrop" *ngIf="showAddModalExam">
-        <div class="modal exam">
-            <h2>Generate new Exam</h2>
+<!-- Generate Exam Modal -->
+<div class="modal-backdrop" *ngIf="showAddModalExam" (click)="closeAddModalExam()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Generate Exam</h2>
+            <button class="close-btn" (click)="closeAddModalExam()">×</button>
+        </div>
 
-            <form (ngSubmit)="generateExam()">
-                <div class="exam-input">
-                    <label for="numberOfQuestions">number of questions (optional):</label>
-                    <input
+        <!-- Success Message -->
+        <div class="feedback-message success" *ngIf="generateSuccess">
+            <div class="feedback-icon">✓</div>
+            <span>Exam generated! Download starting...</span>
+        </div>
+
+        <!-- Error Message -->
+        <div class="feedback-message error" *ngIf="generateError">
+            <div class="feedback-icon">!</div>
+            <span>Failed to generate exam. Please try again.</span>
+        </div>
+
+        <!-- Generating State -->
+        <div class="generating-state" *ngIf="isGenerating">
+            <div class="loading-spinner"></div>
+            <span>Generating your exam...</span>
+            <p class="generating-hint">This may take a moment</p>
+        </div>
+
+        <form (ngSubmit)="generateExam()" *ngIf="!isGenerating && !generateSuccess">
+            <div class="form-group">
+                <label for="numberOfQuestions">Number of Questions (optional)</label>
+                <input
                     type="number"
+                    id="numberOfQuestions"
                     [(ngModel)]="numberOfQuestions"
-                    name="enumberOfQuestions"
+                    name="numberOfQuestions"
                     min="1"
-                    />
+                    max="50"
+                    placeholder="Leave empty for default"
+                />
+            </div>
 
-                    <label for="topics">topics (optional):</label>
-                    <input
+            <div class="form-group">
+                <label for="topics">Topics (optional)</label>
+                <input
                     type="text"
-                    placeholder="possible topics..."
+                    id="topics"
+                    placeholder="e.g., Machine Learning, Neural Networks"
                     [(ngModel)]="topics"
                     name="topics"
-                    />
-                </div>
-                
-                <div class="buttons">
-                <button type="button" (click)="closeAddModalExam()">Cancel</button>
-                <button type="submit">Generate</button>
-                </div>
-            </form>
-        </div>
+                />
+                <span class="input-hint">Separate topics with commas</span>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" (click)="closeAddModalExam()">Cancel</button>
+                <button type="submit" class="btn-primary">Generate Exam</button>
+            </div>
+        </form>
     </div>
 </div>
 

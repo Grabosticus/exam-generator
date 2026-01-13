@@ -1,10 +1,13 @@
-<header class=" header">
-    <div class="title-bar">
-        <div class="title">ExamMaker</div>
-    </div>
+<header class="header">
+    <a routerLink="/" class="logo">
+        <span class="logo-icon">📝</span>
+        <span class="logo-text">ExamMaker</span>
+    </a>
     
     <nav class="nav">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Courses</a>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            <span class="nav-icon">📚</span>
+            Courses
+        </a>
     </nav>
-
 </header>
