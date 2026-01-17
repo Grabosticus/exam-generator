@@ -81,6 +81,8 @@ Your task is to generate {n_new_questions} new exam questions based on the provi
 4. Match the style and difficulty of the example questions. Your generated questions should ideally be indistinguishable from the style of questions given in the example questions.
 5. For multiple-choice and single-choice questions, provide 4 answer options
 6. Ensure every question is clear and self-contained. If a question refers to a function, include the full function definition (or the relevant code snippet) directly in the question.
+7. Use the same language as the course material and example questions (German or English).
+8. Generate NEW questions - do not copy or closely paraphrase the example questions.
 
 === OUTPUT FORMAT ===
 Return a valid JSON array with the following structure for each question:
