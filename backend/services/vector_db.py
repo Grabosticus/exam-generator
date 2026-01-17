@@ -188,21 +188,29 @@ class VectorDB:
 
         # if there is no query we just return the top n results without any semantic search
         if query is None or query.strip() == "":
-            results = self.course_material_collection.get(
+            # Get all IDs for this course to sample randomly
+            # We avoid using offset/limit with global count as it can lead to massive offsets returning empty lists for specific courses
+            results_ids = self.course_material_collection.get(
                 where=filter,
-                limit=pool_size,
-                offset=random.randrange(0, max(1, self.course_material_collection.count() - pool_size + 1)),
-                include=["documents", "metadatas"]
+                include=[]
             )
-
+            
+            all_ids = results_ids["ids"]
             course_materials = []
-            if results["ids"]:
-                idx = random.sample(range(len(results["ids"])), k=min(n, len(results["ids"])))
-                random_results = {k: [results[k][i] for i in idx] for k in ("ids", "documents", "metadatas")}
-
-                for i in range(len(random_results["ids"])):
+            
+            if all_ids:
+                # Sample random IDs
+                selected_ids = random.sample(all_ids, k=min(n, len(all_ids)))
+                
+                # Fetch full data for selected IDs
+                results = self.course_material_collection.get(
+                    ids=selected_ids,
+                    include=["documents", "metadatas"]
+                )
+                
+                for i in range(len(results["ids"])):
                     course_materials.append(
-                        CourseMaterial(text=random_results["documents"][i], metadata=random_results["metadatas"][i])
+                        CourseMaterial(text=results["documents"][i], metadata=results["metadatas"][i])
                     )
             
             self._logger.info("Retrieved course material course_id=%s count=%s", course_id, len(course_materials))
@@ -249,25 +257,30 @@ class VectorDB:
 
         # we just retrieve n old questions
         if query is None or query.strip() == "":
-            results = self.old_exam_collection.get(
+            # Get all IDs for this course to sample randomly
+            results_ids = self.old_exam_collection.get(
                 where=filter,
-                limit=pool_size,
-                offset=random.randrange(0, max(1, self.course_material_collection.count() - pool_size + 1)),
-                include=["documents", "metadatas"]
+                include=[]
             )
-
+            
+            all_ids = results_ids["ids"]
             questions = []
-            if results["ids"]:
-                idx = random.sample(range(len(results["ids"])), k=min(n, len(results["ids"])))
-                random_results = {k: [results[k][i] for i in idx] for k in ("ids", "documents", "metadatas")}
+            
+            if all_ids:
+                selected_ids = random.sample(all_ids, k=min(n, len(all_ids)))
+                
+                results = self.old_exam_collection.get(
+                    ids=selected_ids,
+                    include=["documents", "metadatas"]
+                )
 
-                for i in range(len(random_results["ids"])):
-                    metadata = random_results["metadatas"][i].copy()
+                for i in range(len(results["ids"])):
+                    metadata = results["metadatas"][i].copy()
 
                     question_type = metadata.pop("question_type")
                     question_type = QuestionType(question_type)
 
-                    question_and_answers = random_results["documents"][i].split("[ANSWER_KEYS]")
+                    question_and_answers = results["documents"][i].split("[ANSWER_KEYS]")
                     question = question_and_answers[0]
                     if len(question_and_answers) > 1:
                         answer_keys_str = question_and_answers[1].strip()

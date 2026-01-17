@@ -20,7 +20,7 @@ services:
       MONGO_URL: ${MONGO_URL:-mongodb://mongo:27017}
       LLM_API_KEY: ${LLM_API_KEY}
       # Upgraded to Claude 4.5 Sonnet for better reasoning and RAG handling
-      LLM_MODEL: ${LLM_MODEL:-anthropic/claude-4.5-sonnet}
+      LLM_MODEL: ${LLM_MODEL:-anthropic/claude-sonnet-4.5}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       OCR_ENABLED: ${OCR_ENABLED:-true}
       OCR_MAX_IMAGES_PER_PAGE: ${OCR_MAX_IMAGES_PER_PAGE:-50}
