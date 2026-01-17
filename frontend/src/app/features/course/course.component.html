@@ -37,6 +37,12 @@
                 <span class="action-subtitle">PDF files supported</span>
             </div>
         </div>
+        <div class="material-cards">
+            <div class="material-card" *ngFor="let material of course.materials" [attr.data-fullname]="material.name">
+                <div class="material-icon">{{ getMaterialIcon(material.type) }}</div>
+                <span class="material-name">{{ material.name.replace('.pdf', '') }}</span>
+            </div>
+        </div>
     </div>
 
     <div class="section exam-section">

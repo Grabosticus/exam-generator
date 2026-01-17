@@ -16,7 +16,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 })
 export class CourseComponent {
 
-  course!: Course;
+  course: any = {};
   courseId!: number;
   courseNotFound = false;
   isLoading = true;
@@ -66,6 +66,13 @@ export class CourseComponent {
         } else {
           this.course = data;
         }
+
+        if (!this.course.materials) this.course.materials = [];
+
+        this.course.materials.forEach((m: any) => {
+          m.displayName = m.name.replace('.pdf', '');
+        });
+
         this.isLoading = false;
       },
       error: err => {
@@ -138,6 +145,14 @@ export class CourseComponent {
       next: () => {
         this.isUploading = false;
         this.uploadSuccess = true;
+
+        // adding material to course material
+        this.course.materials.push({
+          name: this.selectedFileName,
+          type: type,
+          displayName: this.selectedFileName.replace('.pdf', '')
+        });
+
         // Auto-close modal after showing success message
         setTimeout(() => {
           this.closeAddModalMaterial();
@@ -154,6 +169,21 @@ export class CourseComponent {
         }
       }
     });
+  }
+
+  // show PDF
+  showMaterial(material: any) {
+    window.open(material.url, '_blank');
+  }
+
+  //gives back correct icon depending on type of material
+  getMaterialIcon(type: string): string {
+    switch (type) {
+      case 'exam': return '📋';
+      case 'notes': return '📝';
+      case 'slides': return '🎞️';
+      default: return '📚';
+    }
   }
 
   openAddModalExam() {

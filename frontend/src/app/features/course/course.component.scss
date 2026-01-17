@@ -190,6 +190,65 @@
   }
 }
 
+// container for Material-cards
+.material-cards {
+  display: flex;
+  flex-wrap: wrap;       
+  gap: 0.75rem;          
+  margin-top: 1rem;
+}
+
+// Material Card
+.material-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  cursor: default;
+  width: 150px; 
+  transition: all 0.2s;
+  position: relative;
+
+  &:hover {
+    background: #eef2ff;
+    transform: translateY(-1px);
+  }
+
+  .material-icon {
+    font-size: 1.25rem;
+  }
+
+  .material-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover::after {
+    content: attr(data-fullname);
+    position: absolute;
+    left: 50%;
+    bottom: 120%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+}
+
+
+
 // Modal
 .modal-backdrop {
   position: fixed;
