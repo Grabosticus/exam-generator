@@ -1,1 +1,3 @@
 In this directoy you can write tests that test your services with real data.
+
+How to run pdf_generator_test: python3 -m test.pdf_generator_test in the backend directory

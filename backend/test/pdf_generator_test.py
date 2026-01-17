@@ -25,8 +25,22 @@ def main():
             question="Which of the following are programming languages?",
             question_type=QuestionType.MULTIPLE_CHOICE,
             metadata={"topic": "computer science"},
-            answer_keys=["Python", "HTML", "Car", "Java"]
+            answer_keys=["Python", "HTML", "Car", "Java", "Something", "C#"]
         ),
+
+        Question(
+            question="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
+            question_type=QuestionType.TEXT_ANSWER,
+            metadata={"topic": "miscellaneous"}
+        ),
+
+        Question(
+            question="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
+            question_type=QuestionType.MULTIPLE_CHOICE,
+            metadata={"topic": "miscellaneous"},
+            answer_keys=["Mmm yes", "rather no", "what even is this question", "this is a very long answer option so that I can test how the text wraps inside the table, I hope it looks nice, but even if it is not especially nice I hope it is at least decent, I am slowly running out of random stuff to write but hopefully this is already at least three lines"]
+        ),
+
     ]
 
     generator = PDFGenerator()

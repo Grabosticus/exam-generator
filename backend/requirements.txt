@@ -12,3 +12,4 @@ pytesseract
 Pillow
 PyMuPDF
 reportlab
+pylatex==1.4.2
