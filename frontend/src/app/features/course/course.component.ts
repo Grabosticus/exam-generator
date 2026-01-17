@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CourseService } from '../../services/course.service';
-import { Course } from '../../services/course.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 
@@ -62,18 +61,29 @@ export class CourseComponent {
       next: data => {
         if (!data || !data.course_id) {
           this.courseNotFound = true;
+          this.isLoading = false;
         } else {
           this.course = data;
+          this.course.materials = [];
+          this.loadMaterials();
         }
-
-        // Ensure materials array exists
-        if (!this.course.materials) this.course.materials = [];
-
-        this.isLoading = false;
       },
       error: err => {
         console.error('Error loading course', err);
         this.courseNotFound = true;
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadMaterials(): void {
+    this.http.get<{name: string, type: string}[]>(`${this.apiUrl}/${this.courseId}/materials`).subscribe({
+      next: materials => {
+        this.course.materials = materials;
+        this.isLoading = false;
+      },
+      error: err => {
+        console.error('Error loading materials', err);
         this.isLoading = false;
       }
     });
@@ -112,7 +122,7 @@ export class CourseComponent {
   getSelectedFilesCount(): number {
     return this.selectedFiles.length;
   }
-  
+
   getSelectedFilesSummary(): string {
     if (this.selectedFiles.length === 1) {
       return this.selectedFiles[0].name;
