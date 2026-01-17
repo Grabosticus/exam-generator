@@ -79,7 +79,7 @@
         <!-- Uploading State -->
         <div class="uploading-state" *ngIf="isUploading">
             <div class="loading-spinner small"></div>
-            <span>Uploading {{ selectedFileName }}...</span>
+            <span>Uploading {{ getSelectedFilesCount() }} files...</span>
         </div>
 
         <form (ngSubmit)="addMaterial()" *ngIf="!isUploading && !uploadSuccess">
@@ -89,12 +89,15 @@
                     id="fileInput"
                     class="file-input-hidden"
                     accept=".pdf"
+                    multiple
                     (change)="onFileSelected($event)"
                 />
                 <label for="fileInput" class="file-upload-label">
                     <div class="upload-icon">📁</div>
-                    <span *ngIf="!selectedFileName">Choose a PDF file</span>
-                    <span *ngIf="selectedFileName" class="selected-file">{{ selectedFileName }}</span>
+                    <span *ngIf="selectedFiles.length === 0">Choose PDF files</span>
+                    <span *ngIf="selectedFiles.length > 0" class="selected-file">
+                        {{ getSelectedFilesSummary() }}
+                    </span>
                 </label>
             </div>
 

@@ -598,7 +598,13 @@ class FileProcessor:
         return threshold
 
     def _split_questions(self, text: str) -> list[str]:
-        pattern = re.compile(r"(?m)(?=^\s*\d+\s*[\.)]\s+)")
+        # Improved regex to handle:
+        # 1. Numbered questions: "1.", "1)", "Question 1", "Problem 1:"
+        # 2. Type-based headers: "True or False:", "Single-Choice:", "Multiple-Choice:"
+        pattern = re.compile(
+            r"(?m)(?=^\s*(?:(?:Question|Problem|Task|Exercise)\s+)?\d{1,3}\s*[\.:\)]\s*|"
+            r"^\s*(?:True or False|Single-Choice|Multiple-Choice|Single Choice|Multiple Choice)\s*:)"
+        )
         matches = list(pattern.finditer(text))
 
         if not matches:
@@ -618,11 +624,16 @@ class FileProcessor:
         if not lines:
             return "", None
 
-        # Identify where answer options start (A), B), etc.)
-        option_regex = re.compile(r"^[A-H][\).]\s+")
+        # Identify where answer options start (A), B), a), b., etc.)
+        # Updated regex to support lowercase a-h
+        option_regex = re.compile(r"^[a-zA-Z][\).]\s+")
         split_idx = None
         for idx, line in enumerate(lines):
+            # Heuristic: usually options are at the end. 
+            # If we find a line starting with "a)" or "A)", check if subsequent lines look like options too 
+            # or if it's just a coincidence in the middle of text.
             if option_regex.match(line):
+                # Extra check: if it's the very first line, it might be a weird formatting, but allow it.
                 split_idx = idx
                 break
 
@@ -639,12 +650,21 @@ class FileProcessor:
         return question_text, answer_keys
 
     def _infer_question_type(self, question_text: str, answer_keys: list[str] | None) -> QuestionType:
+        text_lower = question_text.lower()
+        
+        # Check explicit headers in the text (like from our splitter)
+        if "multiple-choice:" in text_lower or "multiple choice:" in text_lower:
+             return QuestionType.MULTIPLE_CHOICE
+        if "single-choice:" in text_lower or "single choice:" in text_lower:
+             return QuestionType.SINGLE_CHOICE
+        if "true or false:" in text_lower:
+             return QuestionType.SINGLE_CHOICE # True/False is technically single choice
+
         if not answer_keys:
             return QuestionType.TEXT_ANSWER
 
-        hint_text = question_text.lower()
         multi_hints = ["select all", "choose all", "multiple", "two correct", "three correct"]
-        if any(hint in hint_text for hint in multi_hints):
+        if any(hint in text_lower for hint in multi_hints):
             return QuestionType.MULTIPLE_CHOICE
 
         # If more than one answer option we still consider single-choice unless hints say otherwise

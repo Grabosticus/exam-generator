@@ -26,9 +26,9 @@ class QuestionGenerator:
             api_key=api_key,
             base_url="https://openrouter.ai/api/v1"
         )
-        # Default to a cost-effective model, can be any model from OpenRouter
+        # Default to a high-intelligence model for better RAG reasoning
         # See https://openrouter.ai/models for available models
-        self.model = os.environ.get("LLM_MODEL", "openai/gpt-4o-mini")
+        self.model = os.environ.get("LLM_MODEL", "anthropic/claude-3.5-sonnet")
 
     def _build_prompt(
             self,

@@ -26,8 +26,7 @@ export class CourseComponent {
   showAddModalMaterial = false;
   showAddModalExam = false;
 
-  selectedFile: File | null = null;
-  selectedFileName: string = '';
+  selectedFiles: File[] = [];
   examFile: Blob | null = null;
 
   isSlide = false;
@@ -86,8 +85,7 @@ export class CourseComponent {
 
   closeAddModalMaterial() {
     this.showAddModalMaterial = false;
-    this.selectedFile = null;
-    this.selectedFileName = '';
+    this.selectedFiles = [];
     this.isSlide = false;
     this.isNote = false;
     this.isExam = false;
@@ -101,18 +99,28 @@ export class CourseComponent {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
 
-    this.selectedFile = input.files[0];
-    this.selectedFileName = this.selectedFile.name;
+    this.selectedFiles = Array.from(input.files);
     // Reset any previous upload states
     this.uploadSuccess = false;
     this.uploadError = false;
   }
 
+  getSelectedFilesCount(): number {
+    return this.selectedFiles.length;
+  }
+  
+  getSelectedFilesSummary(): string {
+    if (this.selectedFiles.length === 1) {
+      return this.selectedFiles[0].name;
+    }
+    return `${this.selectedFiles.length} files selected`;
+  }
+
   //POST: Material to backend
   addMaterial() {
-    if (!this.selectedFile) {
+    if (this.selectedFiles.length === 0) {
       this.uploadError = true;
-      this.uploadErrorMessage = 'Please select a file.';
+      this.uploadErrorMessage = 'Please select at least one file.';
       return;
     }
 
@@ -131,29 +139,35 @@ export class CourseComponent {
     this.uploadError = false;
     this.uploadSuccess = false;
 
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
+    // We need to upload files sequentially or in parallel?
+    // Since the backend handles one file per request for now, let's do sequential or parallel requests
+    // Using simple Promise.all for parallel uploads
 
-    this.http.post(`${this.apiUrl}/${this.courseId}/upload/${type}`, formData).subscribe({
-      next: () => {
+    const uploadPromises = this.selectedFiles.map(file => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return this.http.post(`${this.apiUrl}/${this.courseId}/upload/${type}`, formData).toPromise();
+    });
+
+    Promise.all(uploadPromises)
+      .then(() => {
         this.isUploading = false;
         this.uploadSuccess = true;
         // Auto-close modal after showing success message
         setTimeout(() => {
           this.closeAddModalMaterial();
         }, 1500);
-      },
-      error: err => {
+      })
+      .catch((err) => {
         console.error('Error uploading file', err);
         this.isUploading = false;
         this.uploadError = true;
         if (err.status == 409) {
-          this.uploadErrorMessage = err.error?.detail ?? 'This material has already been uploaded before';
+           this.uploadErrorMessage = "One or more files have already been uploaded.";
         } else {
-          this.uploadErrorMessage = 'Failed to upload file. Please try again.';
+           this.uploadErrorMessage = "Failed to upload one or more files.";
         }
-      }
-    });
+      });
   }
 
   openAddModalExam() {
