@@ -109,7 +109,17 @@ async def getCourse(course_id: int):
     try:
         course = course_service.get_course(course_id=course_id)
         return CourseModel(**asdict(course))
-    
+
+    except ValueError:
+        raise HTTPException(status_code=404, detail=f"Course with ID {course_id} not found")
+
+# Returns the list of uploaded materials for a course
+@app.get("/courses/{course_id}/materials")
+async def getCourseMaterials(course_id: int):
+    try:
+        course_service.get_course(course_id=course_id)  # Verify course exists
+        materials = hash_db.get_materials_for_course(course_id=course_id)
+        return [{"name": m.get("filename"), "type": m.get("type")} for m in materials]
     except ValueError:
         raise HTTPException(status_code=404, detail=f"Course with ID {course_id} not found")
 
@@ -149,7 +159,7 @@ async def uploadFile(course_id: int, material_type: CourseMaterialType, file: Up
             vector_db.index_course_material(course_material_chunks, course_material_metadata)
 
         logger.info("Upload complete course_id=%s material_type=%s chunks=%s", course_id, material_type, len(exam_question_chunks if material_type == CourseMaterialType.EXAM else course_material_chunks))
-        hash_db.add_file_hash(course_id=course_id, hash=file_hash, type=material_type)
+        hash_db.add_file_hash(course_id=course_id, hash=file_hash, type=material_type, filename=file.filename)
 
         return Response(status_code=200)
 

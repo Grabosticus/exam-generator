@@ -13,13 +13,23 @@ class HashDB:
         self.db = self.client["hash_db"]
         self.collection = self.db["hashes"]
 
-    def add_file_hash(self, course_id: int, hash: str, type: CourseMaterialType = None, generated: bool = False):
+    def add_file_hash(self, course_id: int, hash: str, type: CourseMaterialType = None, generated: bool = False, filename: str = None):
         if generated:
             insert_type = "generated"
         else:
             insert_type = type.value
         hash_entry = {"course_id": course_id, "hash": hash, "type": insert_type}
+        if filename:
+            hash_entry["filename"] = filename
         self.collection.insert_one(hash_entry)
+
+    def get_materials_for_course(self, course_id: int) -> list[dict]:
+        """Returns list of materials (filename, type) for a course, excluding generated exams."""
+        materials = self.collection.find(
+            {"course_id": course_id, "type": {"$ne": "generated"}},
+            {"_id": 0, "filename": 1, "type": 1}
+        )
+        return [m for m in materials if m.get("filename")]
 
     # returns {course_id, hash, type} or None if the hash doesn't exist yet for this course
     def get_file_hash(self, course_id: int, hash: str):

@@ -28,7 +28,7 @@ class QuestionGenerator:
         )
         # Default to Claude Sonnet 4.5 for better RAG reasoning
         # See https://openrouter.ai/models for available models
-        self.model = os.environ.get("LLM_MODEL", "anthropic/claude-sonnet-4-5-20250514")
+        self.model = os.environ.get("LLM_MODEL", "anthropic/claude-sonnet-4.5")
 
     def _build_prompt(
             self,
