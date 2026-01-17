@@ -16,7 +16,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 })
 export class CourseComponent {
 
-  course!: Course;
+  course: any = {};
   courseId!: number;
   courseNotFound = false;
   isLoading = true;
@@ -65,6 +65,10 @@ export class CourseComponent {
         } else {
           this.course = data;
         }
+
+        // Ensure materials array exists
+        if (!this.course.materials) this.course.materials = [];
+
         this.isLoading = false;
       },
       error: err => {
@@ -153,6 +157,15 @@ export class CourseComponent {
       .then(() => {
         this.isUploading = false;
         this.uploadSuccess = true;
+
+        // Add uploaded materials to the display list
+        for (const file of this.selectedFiles) {
+          this.course.materials.push({
+            name: file.name,
+            type: type
+          });
+        }
+
         // Auto-close modal after showing success message
         setTimeout(() => {
           this.closeAddModalMaterial();
@@ -168,6 +181,16 @@ export class CourseComponent {
            this.uploadErrorMessage = "Failed to upload one or more files.";
         }
       });
+  }
+
+  // Returns correct icon depending on type of material
+  getMaterialIcon(type: string): string {
+    switch (type) {
+      case 'exam': return '📋';
+      case 'notes': return '📝';
+      case 'slides': return '🎞️';
+      default: return '📚';
+    }
   }
 
   openAddModalExam() {
