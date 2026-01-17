@@ -599,11 +599,15 @@ class FileProcessor:
 
     def _split_questions(self, text: str) -> list[str]:
         # Improved regex to handle:
-        # 1. Numbered questions: "1.", "1)", "Question 1", "Problem 1:"
-        # 2. Type-based headers: "True or False:", "Single-Choice:", "Multiple-Choice:"
+        # 1. Keyword based: "Question 1", "Frage 1", "## Frage 1" (Markdown), "Problem 1" (Punctuation optional)
+        # 2. Numbered questions: "1.", "1)", "1:" (Punctuation required)
+        # 3. Type-based headers: "True or False:", "Single-Choice:", "Multiple-Choice:"
         pattern = re.compile(
-            r"(?m)(?=^\s*(?:(?:Question|Problem|Task|Exercise)\s+)?\d{1,3}\s*[\.:\)]\s*|"
-            r"^\s*(?:True or False|Single-Choice|Multiple-Choice|Single Choice|Multiple Choice)\s*:)"
+            r"(?m)(?="
+            r"^\s*(?:#{1,6}\s*)?(?:Question|Problem|Task|Exercise|Frage)\s+\d{1,3}|"
+            r"^\s*\d{1,3}\s*[\.:\)]\s*|"
+            r"^\s*(?:True or False|Single-Choice|Multiple-Choice|Single Choice|Multiple Choice)\s*:"
+            r")"
         )
         matches = list(pattern.finditer(text))
 
@@ -624,9 +628,12 @@ class FileProcessor:
         if not lines:
             return "", None
 
-        # Identify where answer options start (A), B), a), b., etc.)
-        # Updated regex to support lowercase a-h
-        option_regex = re.compile(r"^[a-zA-Z][\).]\s+")
+        # Identify where answer options start
+        # Supports:
+        # 1. Standard: "a)", "a.", "A)", "A."
+        # 2. Checkbox style: "- [ ] a.", "- [x] a.", "[ ] a."
+        option_regex = re.compile(r"^\s*(?:[-*]\s*)?(?:\[[\s*xX]\]\s*)?[a-zA-Z][\.:\)]\s+")
+        
         split_idx = None
         for idx, line in enumerate(lines):
             # Heuristic: usually options are at the end. 
@@ -662,6 +669,11 @@ class FileProcessor:
 
         if not answer_keys:
             return QuestionType.TEXT_ANSWER
+
+        # Check for multiple checked boxes [x] or [X] in the answer keys
+        checked_count = sum(1 for key in answer_keys if "[x]" in key.lower())
+        if checked_count > 1:
+            return QuestionType.MULTIPLE_CHOICE
 
         multi_hints = ["select all", "choose all", "multiple", "two correct", "three correct"]
         if any(hint in text_lower for hint in multi_hints):
