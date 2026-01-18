@@ -196,7 +196,7 @@ async def generateExam(course_id: int, n_questions: int = Query(20, ge=1, le=40)
         )
 
         # 3) Generate a new exam PDF based on the generated questions
-        new_exam_pdf: bytes = pdf_generator.generate_pdf(questions=new_questions, course_id=course_id)
+        new_exam_pdf: bytes = pdf_generator.generate_pdf(questions=new_questions, course_id=course_id, course_name=course.name)
         bytes_hash = hash_db.compute_bytes_hash(new_exam_pdf)
         hash_db.add_file_hash(course_id=course_id, hash=bytes_hash, generated=True)
 

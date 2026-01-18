@@ -132,11 +132,12 @@ class PDFGenerator:
     Input: 
         questions... A list of generated questions (see `Question`)
         course_id... The ID of the course for which the exam is generated
+        course_name... The name of the course with the given ID
 
     Output: 
         bytes... A PDF that represents an exam for the course with all questions in it.
     """
-    def generate_pdf(self, questions: list[Question], course_id: int) -> bytes:
+    def generate_pdf(self, questions: list[Question], course_id: int, course_name: str) -> bytes:
         # Create fresh buffer and document for each PDF generation
         self.buffer = BytesIO()
         self.doc, self.styles = self.create_document_template()
@@ -147,7 +148,7 @@ class PDFGenerator:
         story = []
 
         # Title
-        story.append(Paragraph(f"Exam for Course ID: {course_id}", self.styles["title_style"]))
+        story.append(Paragraph(f"Exam for Course {course_name}", self.styles["title_style"]))
         story.append(Spacer(1, self.line_height))
 
         # Timestamp
