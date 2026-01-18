@@ -29,7 +29,7 @@
             <h2>Course Materials</h2>
         </div>
         <p class="section-description">Upload lecture slides, notes, or past exams to help generate practice questions.</p>
-        
+
         <div class="action-card" (click)="openAddModalMaterial()">
             <div class="action-icon">+</div>
             <div class="action-text">
@@ -51,7 +51,7 @@
             <h2>Generate Exam</h2>
         </div>
         <p class="section-description">Create a new practice exam based on your uploaded course materials.</p>
-        
+
         <div class="action-card" (click)="openAddModalExam()">
             <div class="action-icon">✨</div>
             <div class="action-text">
@@ -85,7 +85,7 @@
         <!-- Uploading State -->
         <div class="uploading-state" *ngIf="isUploading">
             <div class="loading-spinner small"></div>
-            <span>Uploading {{ getSelectedFilesCount() }} files...</span>
+            <span>Uploading {{ getSelectedFilesCount() }} {{getSelectedFilesCount() == 1 ? "file" : "files"}}...</span>
         </div>
 
         <form (ngSubmit)="addMaterial()" *ngIf="!isUploading && !uploadSuccess">
